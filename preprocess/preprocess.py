@@ -1,7 +1,7 @@
 # %%
 import pandas as pd
 
-matches = pd.read_csv('D:\\reactProJ\\tennis_wta\\wta_matches_2007.csv')
+matches = pd.read_csv('D:\\reactProJ\\tennis_wta\\wta_matches_2015.csv')
 rankings_colname = ['date', 'rank', 'player_id', 'score', 'remarks']
 rankings = pd.read_csv(
     'D:\\reactProJ\\tennis_wta\\wta_rankings_00s.csv', header=None, names=rankings_colname)
@@ -22,8 +22,11 @@ for index, value in top10_player_id.iteritems():
     # if temp_enroll_final2.empty == False:
     #     top10_final_list.append(temp_enroll_final2)
 top10_final_list = pd.concat(top10_final_list).drop_duplicates()
-top10_final_list.to_json(
-    path_or_buf='.\\top10_final_list.json', orient="records")
+# top10_final_list.to_json(
+#     path_or_buf='.\\top10_final_list_2015.json', orient="records")
 # print(rankings)
-# print(top10_player_id)
+# print(top10_player_id.values.tolist())
 print(top10_final_list)
+
+
+# %%

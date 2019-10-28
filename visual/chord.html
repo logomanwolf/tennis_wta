@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
 <body>
-  <div style="width: 40% ;margin-left: 5%;">
-    <span id="root"></span><span id="text"></span>
+  <div style="width: 40% ;margin-left: 5%;" class="container">
+    <!-- <span id="root"></span><span class="graphArea"></span> -->
   </div>
 </body>
 <style>
@@ -21,14 +21,11 @@
   }
 </style>
 <script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="js/originData.js"></script>
+<script src="js/loadData.js"></script>
+<!-- <script src="js/pie.js"></script> -->
 <script>
-  data = [
-    [11975, 5871, 8916, 2868],
-    [1951, 10048, 2060, 6171],
-    [8010, 16145, 8090, 8045],
-    [1013, 990, 940, 6907]
-  ];
-  top_10 = [
+  top_10_2007 = [
     "200003",
     "201320",
     "201347",
@@ -40,198 +37,19 @@
     "201290",
     "201294"
   ];
-  const loadData = innerFunc => {
-    d3.json("..\\top10_final_list.json").then(data => {
-      winner_list = d3
-        .nest()
-        .key(d => d.winner_id)
-        .rollup(d => d.length)
-        .map(data);
-      // winner_list=JSON.stringify(winner_list)
-      let outer = new Array(top_10.length + 1);
-      result = d3
-        .nest()
-        .key(d => d.winner_id)
-        .key(i => i.loser_id)
-        .rollup(i => i.length)
-        // .sortKeys(d => d3.descending(d.winner_rank))
-        .map(data);
-      // result.map()
-      winner_map_index = {};
-      top_10.forEach((d, i) => {
-        winner_map_index[d] = i;
-      });
-      for (let i = 0; i < top_10.length + 1; i++) {
-        outer[i] = new Array(top_10.length + 1);
-        for (let j = 0; j < top_10.length + 1; j++) outer[i][j] = 0;
-        if (i !== top_10.length) {
-          let loser_collection = result.get(top_10[i]);
-          if (loser_collection !== undefined)
-            loser_collection.keys().forEach(loser_key => {
-              if (top_10.indexOf(loser_key) > -1) {
-                outer[i][winner_map_index[loser_key]] += loser_collection.get(
-                  loser_key
-                );
-              } else {
-                outer[i][top_10.length] += loser_collection.get(loser_key);
-              }
-            });
-        } else {
-          result.keys().forEach(key => {
-            if (top_10.indexOf(key) > -1) {
-              let des = result.get(key);
-              des.keys().forEach(loser_key => {
-                if (top_10.indexOf(loser_key) > -1)
-                  outer[i][winner_map_index[loser_key]] += des.get(loser_key);
-                else outer[i][i] += des.get(loser_key);
-              });
-            }
-          });
-        }
-      }
-      innerFunc({ outer, result, top_10, winner_map_index });
-    });
-  };
-  width = 640;
-  height = Math.min(640, width);
-  outerRadius = Math.min(width, height) * 0.5 - 30;
-  innerRadius = outerRadius - 20;
-  function groupTicks(d, step) {
-    const k = (d.endAngle - d.startAngle) / d.value;
-    return d3.range(0, d.value, step).map(value => {
-      return { value: value, angle: value * k + d.startAngle };
-    });
-  }
-
-  //Comma determines whether to separate groups of 3 digits (before the decimal place) by commas.
-  formatValue = d3.formatPrefix(",.0", 1);
-  chord = d3
-    .chord()
-    .padAngle(0.05)
-    .sortSubgroups(d3.descending);
-  arc = d3
-    .arc()
-    .innerRadius(innerRadius)
-    .outerRadius(outerRadius);
-  ribbon = d3.ribbon().radius(innerRadius);
-  color = d3
-    .scaleOrdinal()
-    .domain(d3.range(10))
-    .range([
-      "#e6f7ff",
-      "#bae7ff",
-      "#91d5ff",
-      "#69c0ff",
-      "#40a9ff",
-      "#1890ff",
-      "#096dd9",
-      "#0050b3",
-      "#003a8c",
-      "#002766"
-    ]);
-  const svg = d3
-    .select("#root")
-    .append("svg")
-    .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("font-size", 10)
-    .attr("font-family", "sans-serif");
-
-  const draw = ({ outer, result, top_10, winner_map_index }) => {
-    const chords = chord(outer);
-    const group = svg
-      .append("g")
-      .selectAll("g")
-      .data(chords.groups)
-      .join("g")
-      .on("mouseover", (d, i) => {
-        d3.selectAll("path.ribbon").attr("opacity", 0.0);
-        d3.selectAll("path.ribbon")
-          .filter(data => {
-            return data.source.index == i;
-          })
-          .attr("opacity", 1);
-        console.log("moveover");
-      })
-      .on("mouseleave", (d, i) => {
-        d3.selectAll("path.ribbon").attr("opacity", 1);
-      });
-
-    group
-      .append("path")
-      .attr("fill", d => color(d.index))
-      .attr("stroke", d => d3.rgb(color(d.index)).darker())
-      .attr("d", arc);
-
-    const groupTick = group
-      .append("g")
-      .selectAll("g")
-      .data(d => groupTicks(d, 1))
-      .join("g")
-      .attr(
-        "transform",
-        d =>
-          `rotate(${(d.angle * 180) / Math.PI -
-            90}) translate(${outerRadius},0)`
-      );
-
-    groupTick
-      .append("line")
-      .attr("stroke", "#000")
-      .attr("x2", 6);
-
-    groupTick
-      // .filter(d => d.value % 5e3 === 0)
-      .append("text")
-      .attr("x", 8)
-      .attr("dy", ".35em")
-      .attr("transform", d =>
-        d.angle > Math.PI ? "rotate(180) translate(-16)" : null
-      )
-      .attr("text-anchor", d => (d.angle > Math.PI ? "end" : null))
-      .text(d => formatValue(d.value));
-    // groupLabel = group
-    //   .append("text")
-    //   .attr("x", 8)
-    //   .attr("dy", "0.35em")
-    //   .attr(
-    //     "transform",
-    //     d =>
-    //       `rotate(${(((d.startAngle + d.endAngle) / 2) * 180) / Math.PI -
-    //         90}) translate(${outerRadius},0)`
-    //   )
-    //   .text(d => {
-    //     if (d.index == 10) return "other";
-    //     else return top_10[d.index];
-    //   });
-    svg
-      .append("g")
-      .attr("class", "outlayer")
-      .attr("fill-opacity", 0.67)
-      .selectAll("g")
-      .append("path")
-      .data(chords)
-      .join("path")
-      .attr("class", "ribbon")
-      .attr("d", ribbon)
-      .attr("fill", d => color(d.target.index))
-      .on("mouseover", d => {
-        d3.selectAll("path.ribbon").attr("opacity", 0.0);
-        d3.select(d3.event.target)
-          .attr(
-            "fill",
-            d3
-              .rgb(color(d.target.index))
-              .darker()
-              .formatHex()
-          )
-          .attr("opacity", 1);
-        console.log("moveover");
-      })
-      .on("mouseleave", d => {
-        d3.selectAll("path.ribbon").attr("opacity", 1);
-        d3.select(d3.event.target).attr("fill", color(d.target.index));
-        console.log("moveleave");
-      });
-  };
-  loadData(draw);
+  top_10_2015 = [
+    "200003",
+    "201320",
+    "201347",
+    "201421",
+    "201345",
+    "201403",
+    "200033",
+    "200748",
+    "201290",
+    "201294"
+  ];
+  loadData(draw, "..\\top10_final_list.json", top_10_2007);
+  loadData(draw, "..\\top10_final_list_2015.json", top_10_2015);
+  drawPie();
 </script>
