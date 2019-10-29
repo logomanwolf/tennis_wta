@@ -112,17 +112,20 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
             (data.target.index == i && data.target.value > 0)
           );
         })
-        .attr("opacity", 1);
+        .attr("opacity", 1)
+        .attr("stroke", (d, i) => d3.rgb(color(i)).brighter());
       console.log("moveover");
     })
     .on("mouseleave", (d, i) => {
-      d3.selectAll("path.ribbon").attr("opacity", 1);
+      d3.selectAll("path.ribbon")
+        .attr("opacity", 1)
+        .attr("stroke", "none");
     });
 
   group
     .append("path")
     .attr("fill", d => color(d.index))
-    .attr("stroke", d => d3.rgb(color(d.index)).darker())
+    // .attr("stroke", d => d3.rgb(color(d.index)).darker())
     .attr("d", arc);
 
   const groupTick = group
@@ -163,7 +166,9 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
     .attr("d", ribbon)
     .attr("fill", d => color(d.target.index))
     .on("mouseover", d => {
-      d3.selectAll("path.ribbon").attr("opacity", 0.0);
+      d3.selectAll("path.ribbon")
+        .attr("opacity", 0.0)
+        .attr("stroke", (d, i) => d3.rgb(color(i)).brighter());
       d3.select(d3.event.target)
         .attr(
           "fill",
@@ -177,7 +182,9 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
     })
     .on("mouseleave", d => {
       d3.selectAll("path.ribbon").attr("opacity", 1);
-      d3.select(d3.event.target).attr("fill", color(d.target.index));
+      d3.select(d3.event.target)
+        .attr("fill", color(d.target.index))
+        .attr("stroke", "none");
       console.log("moveleave");
     });
 };
@@ -204,20 +211,66 @@ const drawPie = () => {
     .arc()
     .innerRadius(innerRadius)
     .outerRadius(outerRadius);
-  let group = svg
-    .append("g")
+  let group = svg.append("g").datum(parseToPieData());
+
+  group
     .selectAll("g")
     .data(parseToPieData())
     .join("g")
     .append("path")
-    .data(parseToPieData())
+    // .data(parseToPieData())
     .join("path")
     .attr("fill", (d, i) => color(i))
-    .attr("stroke", (d, i) => d3.rgb(color(i)).darker())
+    //
     .attr("d", arc)
-    .on('click',(d)=>{
-      // d3.event.target
+    .on("click", d => {
+      d3.select(d3.event.target).attr("visibility", "hidden");
+      //准备处理的data,根据选择的index来辨别用哪一个数据
+      preserveData = [top10_final_list_data, top10_final_list_2015_data];
+      let result = [];
+      let circleData = d3
+        .nest()
+        .key(d => d.winner_id)
+        .rollup(i => i.length)
+        .map(preserveData[d.index]);
+      circleData.keys().forEach(key => {
+        if (top_10_2007.indexOf(key) > -1) result.push(circleData.get(key));
+      });
+      // let circleData2 = d3
+      //   .nest()
+      //   .key(d => d.winner_id)
+      //   .key(i => i.loser_id)
+      //   .rollup(i => i.length)
+      //   .map(top10_final_list_2015_data);
+
+      group
+        .append("g")
+        .selectAll("circle")
+        .data(result)
+        .join("circle")
+        .attr("r", 5)
+        .attr("fill", "red")
+        .attr("transform", i => {
+          // let angle = angleRange(d);
+          // let angle = d3.randomUniform(d.startAngle, d.endAngle)();
+          let line = d3
+            .lineRadial()
+            .angle(d3.randomUniform(d.startAngle, d.endAngle)())
+            .radius(
+              d3
+                .scaleLinear()
+                .domain([0, d3.max(result)])
+                .range([innerRadius, outerRadius])(i)
+            );
+          let coors = line([i])
+            .slice(1)
+            .slice(0, -1);
+          // return `translate(${Math.cos(angle) * radius},${Math.sin(angle) *
+          //   radius})`;
+          return "translate(" + coors + ")";
+        });
     });
-    // let animation= 
+
+  // let animation=
   // group.append("path");
 };
