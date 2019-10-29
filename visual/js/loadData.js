@@ -1,5 +1,5 @@
 const loadData = (innerFunc, filename, top_10) => {
-  winner_map_index = {};
+  let winner_map_index = {};
   top_10.forEach((d, i) => {
     winner_map_index[d] = i;
   });
@@ -49,6 +49,7 @@ const loadData = (innerFunc, filename, top_10) => {
       }
     });
     // }
+    console.log(outer);
     innerFunc({ outer, result, top_10, winner_map_index, originData: data });
   });
 };
@@ -66,10 +67,8 @@ function groupTicks(d, step) {
 
 const draw = ({ outer, result, top_10, winner_map_index }) => {
   let formatValue = d3.formatPrefix(",.0", 1);
-  let chord = d3
-    .chord()
-    .padAngle(0.05)
-    .sortSubgroups(d3.descending);
+  let chord = d3.chord().padAngle(0.05);
+  // .sortSubgroups(d3.descending);
   let arc = d3
     .arc()
     .innerRadius(innerRadius)
@@ -97,8 +96,8 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .attr("font-size", 10)
     .attr("font-family", "sans-serif");
-  const chords = chord(outer);
-  const group = svg
+  let chords = chord(outer);
+  let group = svg
     .append("g")
     .selectAll("g")
     .data(chords.groups)
@@ -114,7 +113,7 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
         })
         .attr("opacity", 1)
         .attr("stroke", (d, i) => d3.rgb(color(i)).brighter());
-      console.log("moveover");
+      console.log("moveover index:" + String(i));
     })
     .on("mouseleave", (d, i) => {
       d3.selectAll("path.ribbon")
@@ -128,7 +127,7 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
     // .attr("stroke", d => d3.rgb(color(d.index)).darker())
     .attr("d", arc);
 
-  const groupTick = group
+  let groupTick = group
     .append("g")
     .selectAll("g")
     .data(d => groupTicks(d, 1))
@@ -228,6 +227,7 @@ const drawPie = () => {
       //准备处理的data,根据选择的index来辨别用哪一个数据
       preserveData = [top10_final_list_data, top10_final_list_2015_data];
       let result = [];
+      // preserveData
       let circleData = d3
         .nest()
         .key(d => d.winner_id)
@@ -243,6 +243,7 @@ const drawPie = () => {
       //   .rollup(i => i.length)
       //   .map(top10_final_list_2015_data);
 
+      //增加圆形图案(测试一下)
       group
         .append("g")
         .selectAll("circle")
@@ -265,10 +266,10 @@ const drawPie = () => {
           let coors = line([i])
             .slice(1)
             .slice(0, -1);
-          // return `translate(${Math.cos(angle) * radius},${Math.sin(angle) *
-          //   radius})`;
           return "translate(" + coors + ")";
         });
+      //改造数据
+      
     });
 
   // let animation=
