@@ -11,16 +11,16 @@ const top_10_2007 = [
   "201294"
 ];
 const top_10_2015 = [
-  "200003",
-  "201320",
-  "201347",
-  "201421",
+  "201594",
+  "201493",
+  "201520",
+  "202469",
+  "201355",
+  "201474",
+  "201425",
   "201345",
-  "201403",
   "200033",
-  "200748",
-  "201290",
-  "201294"
+  "200748"
 ];
 const head2head2007 = [
   [0, 2, 1, 1, 1, 0, 0, 0, 0, 0, 5],
@@ -35,28 +35,73 @@ const head2head2007 = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 2, 1, 0, 0, 1, 1, 1, 1, 0]
 ];
-const head2head2015=[
-  
-]
+const head2head2015 = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+  [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+  [1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1],
+  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2],
+  [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+];
+const tourney_level_map_circle_radius = {
+  G: 20,
+  T1: 10,
+  T2: 9,
+  T3: 4.7,
+  T4: 2.8,
+  p: 4.7,
+  PM: 10,
+  W: 12,
+  I: 2.8
+};
+const winner_map_index_2007 = {
+  200003: 0,
+  200033: 6,
+  200748: 7,
+  201290: 8,
+  201294: 9,
+  201320: 1,
+  201345: 4,
+  201347: 2,
+  201403: 5,
+  201421: 3
+};
+const winner_map_index_2015 = {
+  200033: 8,
+  200748: 9,
+  201345: 7,
+  201355: 4,
+  201425: 6,
+  201474: 5,
+  201493: 1,
+  201520: 2,
+  201594: 0,
+  202469: 3
+};
 const top10_final_list_2015_data = [
   {
-    tourney_id: "2015-W-PM-ESP-01A-2015",
-    winner_id: 201520,
-    winner_name: "Petra Kvitova",
-    winner_rank: 4.0,
-    loser_id: 201320,
-    loser_name: "Svetlana Kuznetsova",
-    loser_rank: 29.0,
-    tourney_level: "PM"
+    tourney_id: "2015-W-INT-CHN-01A-2015",
+    winner_id: 201594,
+    winner_name: "Simona Halep",
+    winner_rank: 3.0,
+    loser_id: 201490,
+    loser_name: "Timea Bacsinszky",
+    loser_rank: 47.0,
+    tourney_level: "I"
   },
   {
-    tourney_id: "2015-W-P700-RUS-01A-2015",
-    winner_id: 201320,
-    winner_name: "Svetlana Kuznetsova",
-    winner_rank: 32.0,
-    loser_id: 201499,
-    loser_name: "Anastasia Pavlyuchenkova",
-    loser_rank: 31.0,
+    tourney_id: "2015-W-PR-UAE-01A-2015",
+    winner_id: 201594,
+    winner_name: "Simona Halep",
+    winner_rank: 4.0,
+    loser_id: 201662,
+    loser_name: "Karolina Pliskova",
+    loser_rank: 18.0,
     tourney_level: "P"
   },
   {
@@ -70,14 +115,64 @@ const top10_final_list_2015_data = [
     tourney_level: "PM"
   },
   {
-    tourney_id: "2015-W-INT-CHN-02A-2015",
-    winner_id: 201347,
-    winner_name: "Jelena Jankovic",
-    winner_rank: 25.0,
-    loser_id: 202653,
-    loser_name: "Denisa Allertova",
-    loser_rank: 74.0,
-    tourney_level: "I"
+    tourney_id: "2015-W-P5-CAN-01A-2015",
+    winner_id: 202505,
+    winner_name: "Belinda Bencic",
+    winner_rank: 20.0,
+    loser_id: 201594,
+    loser_name: "Simona Halep",
+    loser_rank: 3.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P5-USA-01A-2015",
+    winner_id: 200033,
+    winner_name: "Serena Williams",
+    winner_rank: 1.0,
+    loser_id: 201594,
+    loser_name: "Simona Halep",
+    loser_rank: 3.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P700-USA-01A-2015",
+    winner_id: 201493,
+    winner_name: "Angelique Kerber",
+    winner_rank: 16.0,
+    loser_id: 201619,
+    loser_name: "Madison Keys",
+    loser_rank: 20.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P700-GER-01A-2015",
+    winner_id: 201493,
+    winner_name: "Angelique Kerber",
+    winner_rank: 14.0,
+    loser_id: 201496,
+    loser_name: "Caroline Wozniacki",
+    loser_rank: 5.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P700-GBR-01A-2015",
+    winner_id: 201493,
+    winner_name: "Angelique Kerber",
+    winner_rank: 10.0,
+    loser_id: 201662,
+    loser_name: "Karolina Pliskova",
+    loser_rank: 12.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P700-USA-03A-2015",
+    winner_id: 201493,
+    winner_name: "Angelique Kerber",
+    winner_rank: 14.0,
+    loser_id: 201662,
+    loser_name: "Karolina Pliskova",
+    loser_rank: 11.0,
+    tourney_level: "P"
   },
   {
     tourney_id: "2015-W-INT-HKG-01A-2015",
@@ -88,6 +183,136 @@ const top10_final_list_2015_data = [
     loser_name: "Angelique Kerber",
     loser_rank: 9.0,
     tourney_level: "I"
+  },
+  {
+    tourney_id: "2015-W-PR-AUS-02A-2015",
+    winner_id: 201520,
+    winner_name: "Petra Kvitova",
+    winner_rank: 4.0,
+    loser_id: 201662,
+    loser_name: "Karolina Pliskova",
+    loser_rank: 22.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-PM-ESP-01A-2015",
+    winner_id: 201520,
+    winner_name: "Petra Kvitova",
+    winner_rank: 4.0,
+    loser_id: 201320,
+    loser_name: "Svetlana Kuznetsova",
+    loser_rank: 29.0,
+    tourney_level: "PM"
+  },
+  {
+    tourney_id: "2015-W-P700-USA-02A-2015",
+    winner_id: 201520,
+    winner_name: "Petra Kvitova",
+    winner_rank: 5.0,
+    loser_id: 201425,
+    loser_name: "Lucie Safarova",
+    loser_rank: 6.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-WT-SIN-01A-2015",
+    winner_id: 201474,
+    winner_name: "Agnieszka Radwanska",
+    winner_rank: 6.0,
+    loser_id: 201520,
+    loser_name: "Petra Kvitova",
+    loser_rank: 5.0,
+    tourney_level: "W"
+  },
+  {
+    tourney_id: "2015-W-SL-GBR-01A-2015",
+    winner_id: 200033,
+    winner_name: "Serena Williams",
+    winner_rank: 1.0,
+    loser_id: 202469,
+    loser_name: "Garbine Muguruza",
+    loser_rank: 20.0,
+    tourney_level: "G"
+  },
+  {
+    tourney_id: "2015-W-P5-CHN-01A-2015",
+    winner_id: 200748,
+    winner_name: "Venus Williams",
+    winner_rank: 24.0,
+    loser_id: 202469,
+    loser_name: "Garbine Muguruza",
+    loser_rank: 8.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-PM-CHN-01A-2015",
+    winner_id: 202469,
+    winner_name: "Garbine Muguruza",
+    winner_rank: 5.0,
+    loser_id: 201490,
+    loser_name: "Timea Bacsinszky",
+    loser_rank: 17.0,
+    tourney_level: "PM"
+  },
+  {
+    tourney_id: "2015-W-SL-USA-01A-2015",
+    winner_id: 201355,
+    winner_name: "Flavia Pennetta",
+    winner_rank: 26.0,
+    loser_id: 201311,
+    loser_name: "Roberta Vinci",
+    loser_rank: 43.0,
+    tourney_level: "G"
+  },
+  {
+    tourney_id: "2015-W-P700-GBR-02A-2015",
+    winner_id: 202505,
+    winner_name: "Belinda Bencic",
+    winner_rank: 31.0,
+    loser_id: 201474,
+    loser_name: "Agnieszka Radwanska",
+    loser_rank: 13.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-P700-JPN-01A-2015",
+    winner_id: 201474,
+    winner_name: "Agnieszka Radwanska",
+    winner_rank: 13.0,
+    loser_id: 202505,
+    loser_name: "Belinda Bencic",
+    loser_rank: 15.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-INT-CHN-03A-2015",
+    winner_id: 201474,
+    winner_name: "Agnieszka Radwanska",
+    winner_rank: 6.0,
+    loser_id: 203575,
+    loser_name: "Danka Kovinic",
+    loser_rank: 75.0,
+    tourney_level: "I"
+  },
+  {
+    tourney_id: "2015-W-PR-QAT-01A-2015",
+    winner_id: 201425,
+    winner_name: "Lucie Safarova",
+    winner_rank: 15.0,
+    loser_id: 201458,
+    loser_name: "Victoria Azarenka",
+    loser_rank: 48.0,
+    tourney_level: "P"
+  },
+  {
+    tourney_id: "2015-W-SL-FRA-01A-2015",
+    winner_id: 200033,
+    winner_name: "Serena Williams",
+    winner_rank: 1.0,
+    loser_id: 201425,
+    loser_name: "Lucie Safarova",
+    loser_rank: 13.0,
+    tourney_level: "G"
   },
   {
     tourney_id: "2015-W-PR-AUS-01A-2015",
@@ -130,36 +355,6 @@ const top10_final_list_2015_data = [
     tourney_level: "PM"
   },
   {
-    tourney_id: "2015-W-SL-FRA-01A-2015",
-    winner_id: 200033,
-    winner_name: "Serena Williams",
-    winner_rank: 1.0,
-    loser_id: 201425,
-    loser_name: "Lucie Safarova",
-    loser_rank: 13.0,
-    tourney_level: "G"
-  },
-  {
-    tourney_id: "2015-W-SL-GBR-01A-2015",
-    winner_id: 200033,
-    winner_name: "Serena Williams",
-    winner_rank: 1.0,
-    loser_id: 202469,
-    loser_name: "Garbine Muguruza",
-    loser_rank: 20.0,
-    tourney_level: "G"
-  },
-  {
-    tourney_id: "2015-W-P5-USA-01A-2015",
-    winner_id: 200033,
-    winner_name: "Serena Williams",
-    winner_rank: 1.0,
-    loser_id: 201594,
-    loser_name: "Simona Halep",
-    loser_rank: 3.0,
-    tourney_level: "P"
-  },
-  {
     tourney_id: "2015-W-INT-NZL-01A-2015",
     winner_id: 200748,
     winner_name: "Venus Williams",
@@ -170,16 +365,6 @@ const top10_final_list_2015_data = [
     tourney_level: "I"
   },
   {
-    tourney_id: "2015-W-P5-CHN-01A-2015",
-    winner_id: 200748,
-    winner_name: "Venus Williams",
-    winner_rank: 24.0,
-    loser_id: 202469,
-    loser_name: "Garbine Muguruza",
-    loser_rank: 8.0,
-    tourney_level: "P"
-  },
-  {
     tourney_id: "2015-W-WET-CHN-01A-2015",
     winner_id: 200748,
     winner_name: "Venus Williams",
@@ -188,16 +373,6 @@ const top10_final_list_2015_data = [
     loser_name: "Karolina Pliskova",
     loser_rank: 13.0,
     tourney_level: "P"
-  },
-  {
-    tourney_id: "2015-W-INT-THA-01A-2015",
-    winner_id: 201290,
-    winner_name: "Daniela Hantuchova",
-    winner_rank: 73.0,
-    loser_id: 201548,
-    loser_name: "Ajla Tomljanovic",
-    loser_rank: 68.0,
-    tourney_level: "I"
   }
 ];
 const top10_final_list_data = [

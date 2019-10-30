@@ -3,6 +3,7 @@ const loadData = (innerFunc, filename, top_10) => {
   top_10.forEach((d, i) => {
     winner_map_index[d] = i;
   });
+  console.log(winner_map_index);
   d3.json(filename).then(data => {
     winner_list = d3
       .nest()
@@ -49,7 +50,7 @@ const loadData = (innerFunc, filename, top_10) => {
       }
     });
     // }
-    console.log(outer);
+    // console.log(outer);
     innerFunc({ outer, result, top_10, winner_map_index, originData: data });
   });
 };
@@ -177,14 +178,14 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
             .formatHex()
         )
         .attr("opacity", 1);
-      console.log("moveover");
+      // console.log("moveover");
     })
     .on("mouseleave", d => {
       d3.selectAll("path.ribbon").attr("opacity", 1);
       d3.select(d3.event.target)
         .attr("fill", color(d.target.index))
         .attr("stroke", "none");
-      console.log("moveleave");
+      // console.log("moveleave");
     });
 };
 const drawPie = () => {
@@ -231,29 +232,29 @@ const drawPie = () => {
       let circleData = d3
         .nest()
         .key(d => d.winner_id)
-        .rollup(i => i.length)
+        // .rollup(i => i.length)
         .map(preserveData[d.index]);
+      let outOfTop10 = [];
       circleData.keys().forEach(key => {
         if (top_10_2007.indexOf(key) > -1) result.push(circleData.get(key));
+        else outOfTop10.concat(circleData.get(key));
       });
-      // let circleData2 = d3
-      //   .nest()
-      //   .key(d => d.winner_id)
-      //   .key(i => i.loser_id)
-      //   .rollup(i => i.length)
-      //   .map(top10_final_list_2015_data);
 
       //增加圆形图案(测试一下)
-      group
-        .append("g")
-        .selectAll("circle")
+
+      let circleGroup = group
+        .selectAll("g")
         .data(result)
+        .join("g");
+      circleGroup
+        .selectAll("circle")
+        .data((d, i) => {
+          return d[i];
+        })
         .join("circle")
         .attr("r", 5)
         .attr("fill", "red")
         .attr("transform", i => {
-          // let angle = angleRange(d);
-          // let angle = d3.randomUniform(d.startAngle, d.endAngle)();
           let line = d3
             .lineRadial()
             .angle(d3.randomUniform(d.startAngle, d.endAngle)())
@@ -269,9 +270,5 @@ const drawPie = () => {
           return "translate(" + coors + ")";
         });
       //改造数据
-      
     });
-
-  // let animation=
-  // group.append("path");
 };
