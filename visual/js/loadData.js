@@ -247,7 +247,10 @@ const drawPie = () => {
               .join("circle")
               .attr("r", d => tourney_level_map_circle_radius[d.tourney_level])
               // .attr("r", 5)
+
               .transition()
+              .duration(1000)
+              .ease(t => d3.easeLinear(t))
               .attrTween("transform", data => {
                 let line = d3
                   .lineRadial()
