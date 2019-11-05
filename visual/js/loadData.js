@@ -46,7 +46,7 @@ const loadData = (innerFunc, filename, top_10) => {
     });
     // }
     // console.log(outer);
-    console.log(outerDetail);
+    // console.log(outerDetail);
     innerFunc({ outer, result, top_10, winner_map_index, originData: data });
   });
 };
@@ -185,8 +185,8 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
     });
 };
 const drawPie = () => {
-  let innerRadius = 100;
-  let outerRadius = 120;
+  let innerRadius = 200;
+  let outerRadius = 240;
   let svg = d3
     .select(".container")
     .append("span")
@@ -212,17 +212,10 @@ const drawPie = () => {
   let group = svg.append("g").attr("class", "bigPie");
 
   let drawArc = data => {};
-  group
-    // .selectAll("g")
-    .selectAll("path")
+  let g = group
+    .selectAll("g")
     .data(parseToPieData())
-    // .join("g")
-    // .append("path")
-    // .data(parseToPieData())
-    .join("path")
-    .attr("fill", (d, i) => color(i))
-    //
-    .attr("d", arc)
+    .join("g")
     .on("click", d => {
       // d3.select(d3.event.target).attr("visibility", "hidden");
       //准备处理的data,根据选择的index来辨别用哪一个数据
@@ -232,19 +225,63 @@ const drawPie = () => {
       preserveMatrix = [head2head2007, head2head2015][d.index];
       let top_10s = [top_10_2007, top_10_2015][d.index];
       // let curData=d3.select(d3.event.target).data()
+      let allChampionGroupByTop10 = processData(preserveData, top_10s).map(
+        item => {
+          return item.reduce((a, b) => a.concat(b));
+        }
+      );
+      let pieData = d3.pie()(allChampionGroupByTop10.map(i => i.length));
+      pieData.forEach((d, i) => {
+        d.detail = allChampionGroupByTop10[i];
+      });
       let tran2 = () => {
-        group
-          .selectAll("path")
-          .data(
-            d3.pie()(
-              processData(preserveData, top_10s)
-                .map(item => {
-                  return item.reduce((a, b) => a.concat(b));
-                })
-                .map(i => i.length)
-            )
-          )
-          .join("path")
+        let g = group
+          .selectAll("g")
+          .data(pieData)
+          .join("g")
+          .on("click", d => {
+            d3.select(d3.event.target).remove("path");
+            d3.select(d3.event.currentTarget)
+              .selectAll("circle")
+              .data(d.detail)
+              .join("circle")
+              .attr("r", d => tourney_level_map_circle_radius[d.tourney_level])
+              // .attr("r", 5)
+              .transition()
+              .attrTween("transform", data => {
+                let line = d3
+                  .lineRadial()
+                  .angle(d3.randomUniform(d.startAngle, d.endAngle)())
+                  .radius(
+                    d3
+                      .scaleLinear()
+                      .domain([20, 2.8])
+                      .range([outerRadius * 0.2, outerRadius])(
+                      tourney_level_map_circle_radius[data.tourney_level]
+                    )
+                  );
+                let coors = line([
+                  tourney_level_map_circle_radius[data.tourney_level]
+                ])
+                  .slice(1)
+                  .slice(0, -1);
+                console.log(coors);
+                let x = parseFloat(coors.split(",")[0]),
+                  y = parseFloat(coors.split(",")[1]);
+                let tx = d3.interpolate(0, x);
+                let ty = d3.interpolate(0, y);
+                return t => {
+                  let px = tx(t),
+                    py = ty(t);
+                  let coors = String(px) + "," + String(py);
+                  return "translate(" + coors + ")";
+                };
+              })
+
+              .attr("fill", "red");
+          });
+        g.select("path").remove();
+        g.append("path")
           .transition()
           .duration(1000)
           .attr("fill", color(d.index))
@@ -281,7 +318,7 @@ const drawPie = () => {
           .on("end", tran2);
       }; 
       */
-      tran1();
+      tran2();
 
       /*这一部分是可用的动画，包括舒展->新分扇区
       d3.select(d3.event.target)
@@ -298,23 +335,8 @@ const drawPie = () => {
         .attr("fill", color(d.index))
         .on("end", tran2);
       */
-      // .join("g")
-      // .append("path")
-      // .join("path");
-      // let result = [];
-      // // preserveData
-      // let circleData = d3
-      //   .nest()
-      //   .key(d => d.winner_id)
-      //   // .ro.llup(i => i.length)
-      //   .map(preserveData[d.index]);
-      // let outOfTop10 = [];
-      // circleData.keys().forEach(key => {
-      //   if (top_10_2007.indexOf(key) > -1) result.push(circleData.get(key));
-      //   else outOfTop10.concat(circleData.get(key));
-      // });
 
-      // //增加圆形图案(测试一下)
+      //增加圆形图案(测试一下)
 
       // let circleGroup = group
       //   .selectAll("g")
@@ -345,4 +367,8 @@ const drawPie = () => {
       //   });
       //改造数据
     });
+  g.append("path")
+    .attr("fill", (d, i) => color(i))
+    //
+    .attr("d", arc);
 };

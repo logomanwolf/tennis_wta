@@ -55,6 +55,7 @@ const tourney_level_map_circle_radius = {
   T3: 4.7,
   T4: 2.8,
   p: 4.7,
+  P: 4.7,
   PM: 10,
   W: 12,
   I: 2.8
