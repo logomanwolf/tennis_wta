@@ -3,20 +3,15 @@ const loadData = (innerFunc, filename, top_10) => {
   top_10.forEach((d, i) => {
     winner_map_index[d] = i;
   });
-  console.log(winner_map_index);
+  // console.log(winner_map_index);
   d3.json(filename).then(data => {
-    winner_list = d3
-      .nest()
-      .key(d => d.winner_id)
-      .rollup(d => d.length)
-      .map(data);
-    // winner_list=JSON.stringify(winner_list)
     let outer = new Array(top_10.length + 1);
+    let outerDetail = new Array(top_10.length + 1);
     result = d3
       .nest()
       .key(d => d.winner_id)
       .key(i => i.loser_id)
-      .rollup(i => i.length)
+      // .rollup(i => i.length)
       // .sortKeys(d => d3.descending(d.winner_rank))
       .map(data);
     // result.map()
@@ -24,33 +19,34 @@ const loadData = (innerFunc, filename, top_10) => {
     for (let i = 0; i < top_10.length + 1; i++) {
       //初始化outer数组
       outer[i] = new Array(top_10.length + 1);
-      for (let j = 0; j < top_10.length + 1; j++) outer[i][j] = 0;
+      outerDetail[i] = new Array(top_10.length + 1);
+      for (let j = 0; j < top_10.length + 1; j++) {
+        outer[i][j] = 0;
+        outerDetail[i][j] = [];
+      }
     }
     result.keys().forEach(winner_key => {
       let des = result.get(winner_key);
+      let i = top_10.length,
+        j = top_10.length;
       if (top_10.indexOf(winner_key) > -1) {
         des.keys().forEach(loser_key => {
-          if (top_10.indexOf(loser_key) > -1)
-            outer[winner_map_index[winner_key]][
-              winner_map_index[loser_key]
-            ] += des.get(loser_key);
-          else
-            outer[winner_map_index[winner_key]][top_10.length] += des.get(
-              loser_key
-            );
+          i = winner_map_index[winner_key];
+          if (top_10.indexOf(loser_key) > -1) j = winner_map_index[loser_key];
+          outer[i][j] += des.get(loser_key).length;
+          outerDetail[i][j] = outerDetail[i][j].concat(des.get(loser_key));
         });
       } else {
         des.keys().forEach(loser_key => {
-          if (top_10.indexOf(loser_key) > -1)
-            outer[top_10.length][winner_map_index[loser_key]] += des.get(
-              loser_key
-            );
-          else outer[top_10.length][top_10.length] += des.get(loser_key);
+          if (top_10.indexOf(loser_key) > -1) j = winner_map_index[loser_key];
+          outer[i][j] += des.get(loser_key).length;
+          outerDetail[i][j] = outerDetail[i][j].concat(des.get(loser_key));
         });
       }
     });
     // }
     // console.log(outer);
+    console.log(outerDetail);
     innerFunc({ outer, result, top_10, winner_map_index, originData: data });
   });
 };
@@ -114,7 +110,7 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
         })
         .attr("opacity", 1)
         .attr("stroke", (d, i) => d3.rgb(color(i)).brighter());
-      console.log("moveover index:" + String(i));
+      // console.log("moveover index:" + String(i));
     })
     .on("mouseleave", (d, i) => {
       d3.selectAll("path.ribbon")
@@ -199,10 +195,11 @@ const drawPie = () => {
   //[ {tourney_id: "2015-W-PM-ESP-01A-2015",winner_id: 201520,winner_name: "Petra Kvitova",winner_rank: 4.0,loser_id: 201320,loser_name: "Svetlana Kuznetsova",loser_rank: 29.0  }]
   let parseToPieData = () => {
     return d3.pie()([
-      top10_final_list_2015_data.length,
-      top10_final_list_data.length
+      top10_final_list_data.length,
+      top10_final_list_2015_data.length
     ]);
   };
+
   let color = d3
     .scaleOrdinal()
     .domain(d3.range(2))
@@ -210,65 +207,142 @@ const drawPie = () => {
   let arc = d3
     .arc()
     .innerRadius(innerRadius)
-    .outerRadius(outerRadius);
-  let group = svg.append("g").datum(parseToPieData());
+    .outerRadius(outerRadius)
+    .padAngle(0.05);
+  let group = svg.append("g").attr("class", "bigPie");
 
+  let drawArc = data => {};
   group
-    .selectAll("g")
+    // .selectAll("g")
+    .selectAll("path")
     .data(parseToPieData())
-    .join("g")
-    .append("path")
+    // .join("g")
+    // .append("path")
     // .data(parseToPieData())
     .join("path")
     .attr("fill", (d, i) => color(i))
     //
     .attr("d", arc)
     .on("click", d => {
-      d3.select(d3.event.target).attr("visibility", "hidden");
+      // d3.select(d3.event.target).attr("visibility", "hidden");
       //准备处理的data,根据选择的index来辨别用哪一个数据
-      preserveData = [top10_final_list_data, top10_final_list_2015_data];
-      let result = [];
-      // preserveData
-      let circleData = d3
-        .nest()
-        .key(d => d.winner_id)
-        // .rollup(i => i.length)
-        .map(preserveData[d.index]);
-      let outOfTop10 = [];
-      circleData.keys().forEach(key => {
-        if (top_10_2007.indexOf(key) > -1) result.push(circleData.get(key));
-        else outOfTop10.concat(circleData.get(key));
-      });
+      preserveData = [top10_final_list_data, top10_final_list_2015_data][
+        d.index
+      ];
+      preserveMatrix = [head2head2007, head2head2015][d.index];
+      let top_10s = [top_10_2007, top_10_2015][d.index];
+      // let curData=d3.select(d3.event.target).data()
+      let tran2 = () => {
+        group
+          .selectAll("path")
+          .data(
+            d3.pie()(
+              processData(preserveData, top_10s)
+                .map(item => {
+                  return item.reduce((a, b) => a.concat(b));
+                })
+                .map(i => i.length)
+            )
+          )
+          .join("path")
+          .transition()
+          .duration(1000)
+          .attr("fill", color(d.index))
+          .attrTween("d", d => {
+            let i = d3.interpolate(d.startAngle, d.endAngle);
+            return t => {
+              d.endAngle = i(t);
+              return arc(d);
+            };
+          });
+      };
 
-      //增加圆形图案(测试一下)
+      /* 可以用的tran1->tran2，包括没有遮盖。
+      let tran1 = () => {
+        let piedata = [
+          top10_final_list_data.length,
+          top10_final_list_2015_data.length
+        ];
+        piedata[d.index] = 0;
+        group
+          .selectAll("path")
+          .data(d3.pie()(piedata))
+          .join("path")
+          .transition()
+          .duration(1000)
+          .attr("fill", color(d.index))
+          .attrTween("d", d => {
+            let i = d3.interpolate(d.startAngle, d.endAngle);
+            return t => {
+              d.endAngle = i(t);
+              return arc(d);
+            };
+          })
+          .on("end", tran2);
+      }; 
+      */
+      tran1();
 
-      let circleGroup = group
-        .selectAll("g")
-        .data(result)
-        .join("g");
-      circleGroup
-        .selectAll("circle")
-        .data((d, i) => {
-          return d[i];
+      /*这一部分是可用的动画，包括舒展->新分扇区
+      d3.select(d3.event.target)
+        // .select("path")
+        .transition()
+        .duration(500)
+        .attrTween("d", d => {
+          let i = d3.interpolate(d.endAngle, d.startAngle + 2 * Math.PI);
+          return t => {
+            d.endAngle = i(t);
+            return arc(d);
+          };
         })
-        .join("circle")
-        .attr("r", 5)
-        .attr("fill", "red")
-        .attr("transform", i => {
-          let line = d3
-            .lineRadial()
-            .angle(d3.randomUniform(d.startAngle, d.endAngle)())
-            .radius(
-              d3
-                .scaleLinear()
-                .domain([0, d3.max(result)])
-                .range([innerRadius, outerRadius])(i)
-            );
-          let coors = line([i])
-            .slice(1)
-            .slice(0, -1);
-          return "translate(" + coors + ")";
-        });
+        .attr("fill", color(d.index))
+        .on("end", tran2);
+      */
+      // .join("g")
+      // .append("path")
+      // .join("path");
+      // let result = [];
+      // // preserveData
+      // let circleData = d3
+      //   .nest()
+      //   .key(d => d.winner_id)
+      //   // .ro.llup(i => i.length)
+      //   .map(preserveData[d.index]);
+      // let outOfTop10 = [];
+      // circleData.keys().forEach(key => {
+      //   if (top_10_2007.indexOf(key) > -1) result.push(circleData.get(key));
+      //   else outOfTop10.concat(circleData.get(key));
+      // });
+
+      // //增加圆形图案(测试一下)
+
+      // let circleGroup = group
+      //   .selectAll("g")
+      //   .data(result)
+      //   .join("g");
+      // circleGroup
+      //   .selectAll("circle")
+      //   .data((d, i) => {
+      //     return d[i];
+      //   })
+      //   .join("circle")
+      //   .attr("r", 5)
+      //   .attr("fill", "red")
+      //   .attr("transform", i => {
+      //     let line = d3
+      //       .lineRadial()
+      //       .angle(d3.randomUniform(d.startAngle, d.endAngle)())
+      //       .radius(
+      //         d3
+      //           .scaleLinear()
+      //           .domain([0, d3.max(result)])
+      //           .range([innerRadius, outerRadius])(i)
+      //       );
+      //     let coors = line([i])
+      //       .slice(1)
+      //       .slice(0, -1);
+      //     return "translate(" + coors + ")";
+      //   });
       //改造数据
     });
 };
