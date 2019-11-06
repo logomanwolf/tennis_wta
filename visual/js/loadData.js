@@ -3,7 +3,7 @@ const loadData = (innerFunc, filename, top_10) => {
   top_10.forEach((d, i) => {
     winner_map_index[d] = i;
   });
-  // console.log(winner_map_index);
+  console.log(winner_map_index);
   d3.json(filename).then(data => {
     let outer = new Array(top_10.length + 1);
     let outerDetail = new Array(top_10.length + 1);
@@ -89,6 +89,7 @@ const draw = ({ outer, result, top_10, winner_map_index }) => {
   let svg = d3
     .select(".container")
     .append("span")
+    // .attr("display", "inline")
     .append("svg")
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .attr("font-size", 10)
@@ -211,7 +212,13 @@ const drawPie = () => {
     .padAngle(0.05);
   let group = svg.append("g").attr("class", "bigPie");
 
-  let drawArc = data => {};
+  let colorPlate = t =>
+    d3.interpolateBlues(
+      d3
+        .scaleLinear()
+        .domain([0, 10])
+        .range([0, 1])(t)
+    );
   let g = group
     .selectAll("g")
     .data(parseToPieData())
@@ -234,23 +241,28 @@ const drawPie = () => {
       pieData.forEach((d, i) => {
         d.detail = allChampionGroupByTop10[i];
       });
+      let pieColor = color(d.index);
+
       let tran2 = () => {
+        // let index = d.index;
         let g = group
           .selectAll("g")
           .data(pieData)
           .join("g")
-          .on("click", d => {
-            d3.select(d3.event.target).remove("path");
+          .on("click", (d, index) => {
+            d3.select(d3.event.target)
+              .attr("stroke", colorPlate(index))
+              .attr("fill", "none");
+            //start draw circle
             d3.select(d3.event.currentTarget)
               .selectAll("circle")
               .data(d.detail)
               .join("circle")
               .attr("r", d => tourney_level_map_circle_radius[d.tourney_level])
               // .attr("r", 5)
-
               .transition()
               .duration(1000)
-              .ease(t => d3.easeLinear(t))
+              .ease(t => d3.easeElastic(t))
               .attrTween("transform", data => {
                 let line = d3
                   .lineRadial()
@@ -259,7 +271,7 @@ const drawPie = () => {
                     d3
                       .scaleLinear()
                       .domain([20, 2.8])
-                      .range([outerRadius * 0.2, outerRadius])(
+                      .range([outerRadius * 0.2, innerRadius])(
                       tourney_level_map_circle_radius[data.tourney_level]
                     )
                   );
@@ -280,20 +292,24 @@ const drawPie = () => {
                   return "translate(" + coors + ")";
                 };
               })
-
-              .attr("fill", "red");
+              .attr("fill", colorPlate(index));
+            //end draw circle
           });
         g.select("path").remove();
         g.append("path")
           .transition()
-          .duration(1000)
-          .attr("fill", color(d.index))
+          .duration(500)
           .attrTween("d", d => {
             let i = d3.interpolate(d.startAngle, d.endAngle);
             return t => {
               d.endAngle = i(t);
               return arc(d);
             };
+          })
+          .transition()
+          .attrTween("fill", (d, i) => {
+            let interpolate = d3.interpolate(pieColor, colorPlate(i));
+            return t => interpolate(t);
           });
       };
 
@@ -372,6 +388,5 @@ const drawPie = () => {
     });
   g.append("path")
     .attr("fill", (d, i) => color(i))
-    //
     .attr("d", arc);
 };
